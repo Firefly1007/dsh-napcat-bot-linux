@@ -1,26 +1,79 @@
-# dsh-napcat-bot
+# dsh-napcat-bot-linux · DSHA Linux arm64
 
-[![release](https://img.shields.io/github/v/release/9178159/dsh-napcat-bot?color=red)](../../releases)
-[![license](https://img.shields.io/github/license/9178159/dsh-napcat-bot)](LICENSE)
-[![platform](https://img.shields.io/badge/platform-Windows-0078d4)](#安装)
+[![release](https://img.shields.io/github/v/release/Firefly1007/dsh-napcat-bot-linux?color=red)](https://github.com/Firefly1007/dsh-napcat-bot-linux/releases/latest)
+[![license](https://img.shields.io/github/license/Firefly1007/dsh-napcat-bot-linux)](LICENSE)
+[![platform](https://img.shields.io/badge/platform-DSHA%20Linux%20arm64-0078d4)](#安装)
 [![deps](https://img.shields.io/badge/npm%20deps-0-brightgreen)](package.json)
 
 
-DeepSeek Harness (DSH) 插件：**内置 NapCat**（随 tgz 一起分发），启用即自动启动、监听 **6099**，并且**通过 NapCat 官方 WebUI API 自动开启 OneBot 正向 HTTP + 正向 WS**，WS 断线自动重连、进程异常自动拉起，让 AI 通过 QQ 私聊 / 群聊与真人对话。
+安装到 **DSHA 内 DSH** 的插件，在 DSHA 的 Ubuntu/glibc arm64 环境中运行。**首次需要时自动下载固定版本 Linux QQ 和 NapCat，校验后保存在插件私有数据目录，后续直接复用**；Linux 系统依赖随 tgz 分发。启用时自动启动 NapCat，通过 WebUI API 自动开启 OneBot 正向 HTTP + 正向 WS，并保留 WS 重连、异常恢复、模型回复和全部原有业务功能。语音按当前版本要求使用豆包（火山引擎）API。
 
-> **开箱即用**：安装并启用插件 → **重启 DSH** → 打开侧边【设置 → 集成 → NapCat QQ 机器人】→ 在「NapCat WebUI」标签页**扫码登录 QQ** → 完事。
-> 接口地址、端口、OneBot access_token、WebUI 管理 Token 全部由插件自动生成与写入，**不用手填、不用手抄、不用调试连接**。
-> OneBot WS 固定 `ws://127.0.0.1:3001`；如果历史配置被写成了 6099，插件会自动纠正并落盘。
->
-> 零外部 npm 依赖、可离线运行；不带 `pnpm-lock.yaml`，不会触发 pnpm 供应链校验。
+> 这是上游 **2.8.0** 的 DSHA 平台移植，源码固定于 [`26d747f22eb4e16905b806a6bb3f23a791fed09b`](https://github.com/9178159/dsh-napcat-bot/tree/26d747f22eb4e16905b806a6bb3f23a791fed09b)。包名和插件 ID 为 `dsh-napcat-bot-linux`，运行数据继续使用原有目录，沿用 MIT 许可；第三方运行资产各自遵循其许可。
+> 软件检查、实际归档检查与 DSHA 真机验收分别记录。**生成 tgz 不代表手机已安装或 QQ 已登录**；设备版本、无桌面运行依赖和未验证项见下文。
 
 ## 安装
 
-- **推荐**：从 [Releases](https://github.com/9178159/dsh-napcat-bot/releases) 下载 `dsh-napcat-bot-x.y.z.tgz`，在 DSH 插件市场「导入本地包」里选择它。
-- **源码**：本仓库不含 `vendor/`（内置 NapCat 本体约 111MB 的第三方二进制，用 Release 分发更合适）。
-  clone 后可直接读改 `lib/`；要打包成可安装 tgz，请把 NapCat 解压到 `vendor/napcat/` 再 `tar -czf`。
+1. 目标为 DSHA 的 **Linux arm64/glibc guest**，需要 Node 24 和可用的 DSH 插件服务。不是安卓 QQ 插件，不支持直接在 Android Bionic 或 Windows 中运行这份 Linux 版本。DSHA 资料基线为 DSH `0.2.1-rc.2`，实际支持范围以设备验收为准。
+2. 在 **DSHA 原生插件市场**粘贴下面的仓库链接安装。仓库已包含所需系统依赖与豆包客户端，可直接安装，无需先构建或手动补文件。也可从 [Releases](https://github.com/Firefly1007/dsh-napcat-bot-linux/releases/latest) 下载 `dsh-napcat-bot-linux-2.8.0-dsha-linux-arm64.tgz`，选择「导入本地包」。上游 Windows Release 不能替代这个包。
+3. 安装并启用后，按 DSHA 提示**正常重启 Web**，使服务端插件实际加载。首次启动需要联网自动获取 QQ 和 NapCat，下载较大，请等待日志中的准备结果。在【设置 → 集成 → NapCat QQ 机器人】打开「NapCat WebUI」，扫码登录。无需另外手动启动 NapCat。
+4. 看三个状态灯区分 NapCat 进程、OneBot WS 连接和收发就绪。安装成功、插件加载成功、QQ 登录成功是三个独立结果。
 
-> 装好必须**完全退出 DSH 再启动**：服务端 `lib/index.js` 只在启动时加载一次。
+```text
+https://github.com/Firefly1007/dsh-napcat-bot-linux
+```
+
+仓库安装与 Release 安装使用相同的插件 ID：`dsh-napcat-bot-linux`。豆包 Key 由用户在插件设置中自行填写。手机内嵌 WebUI 使用 NapCat 原生移动布局，左上角菜单可展开或收起。
+
+WebUI 默认 `http://127.0.0.1:6099/webui`，OneBot HTTP 默认 `3000`，正向 WS 默认 `3001`，保留原有可配置行为和端口纠错。插件分别管理 WebUI Token 和 OneBot `access_token`，无需混用或手抄。服务保持本机访问，不为手机适配而改成局域网公开监听。
+
+Linux QQ/Electron 仍需要 Xvfb/xauth 和匹配的系统库，本包携带 Ubuntu 24.04 arm64 依赖 `.deb`，由插件解包到隔离目录使用，不执行系统安装脚本或启动系统服务。tgz 不是完整 Ubuntu 系统镜像；启动失败时先看面板的具体缺失项和日志，不需要 Linux 桌面、systemd、Docker 或 Android root。
+
+### 源码构建与资产
+
+开发机可使用 Windows；构建需要 **Node 24、npm 和 tar**。仓库已包含 `vendor/runtime/` 系统依赖和 `vendor/doubao-tts/` 语音客户端，克隆后即可打包；打包脚本不会在线下载或执行第三方安装脚本。QQ 与 NapCat 不放进插件包，在运行时按固定来源下载。
+
+| 资产 | 固定版本 / 来源 | 包内位置 |
+|---|---|---|
+| NapCat Shell | [v4.18.41](https://github.com/NapNeko/NapCatQQ/releases/tag/v4.18.41) | 首次需要时自动下载，含 WebUI、依赖和 Linux arm64 原生模块 |
+| Linux QQ NT | [3.2.34-53644 arm64](https://qqdl.gtimg.cn/qqfile/QQNT/9.9.36/beta/9ee04bef/linuxqq_3.2.34-53644_arm64.deb) | 首次需要时自动下载、解包，后续复用 |
+| Xvfb / xauth / QQ 系统库 | Ubuntu 24.04 noble arm64，逐包清单见 `vendor/runtime/packages.json` | `vendor/runtime/debs/` |
+| 豆包语音客户端 | 火山官方 Python 示例（Apache-2.0）与随包 httpx 依赖，来源见 `UPSTREAM.json` | `vendor/doubao-tts/` |
+
+固定 QQ `.deb` 的 SHA256 为 `181b895cb573548e396e54bb0548cca92ffdc1b1a4b018fa4551bb062385fdca`，运行时下载后校验，避免复用其他版本或不完整下载。
+
+```sh
+node --test scripts/pack-dsha.test.mjs
+npm run pack:dsha
+```
+
+输出使用 npm 的 `package/` 归档布局，保留原有 `dsh.bundle.patch`、服务端与浏览器入口，不引入额外 npm 依赖。脚本检查必要资产、清单完整性及每个依赖包的 SHA256，拒绝登录数据、Token 配置、日志和工程临时目录混入，并校对压缩包的实际文件清单。系统依赖 `.deb` 的链接和 Linux 权限保持在原始包内，兼容 Windows 打包；保留 DSHA 自身 glibc，不随包覆盖。归档实际大小不得超过 DSHA 本地导入的 **256 MiB** 上限。
+
+### 数据、更新与恢复
+
+数据根目录仍是 `$DSH_HOME/napcat-bot`；未设置 `DSH_HOME` 时使用 `~/.dsh/napcat-bot`。原有配置、会话、记忆、知识库、规则和任务继续沿用。
+
+- QQ 下载后解包到数据目录下 `runtime/qq-3.2.34-53644`，无需把 `.deb` 全局安装到系统。
+- NapCat 可写配置存于 `napcat/`，QQ 登录数据存于 `qq-home/`；它们与插件代码和只读发行资产分开，更新插件包不应覆盖或清空这些目录。
+- Linux QQ 的 `resources/app/package.json` 入口会按 NapCat Shell 方式接入，原始入口按对应 QQ 版本保留，允许重复执行并恢复。不要把运行后含登录信息的目录重新打包分享。
+- 停止只针对本插件拥有且已核验身份的进程；端口占用本身不是可终止其他进程的依据。
+
+### 豆包语音配置
+
+在【AI 配置 → 语音】填写 `ttsDoubaoApiKey`，资源 ID `ttsDoubaoResourceId` 默认 `seed-tts-2.0`。`ttsVoice` 或 `ttsVoicePool` 填火山控制台已授权的 **Speaker ID**；API Key、资源 ID 和音色需要具备匹配的调用权限。接口采用[豆包单向流式 HTTP 语音合成](https://docs.volcengine.com/docs/DoubaoVoice/unidirectional-streaming-text-to-speech-http?lang=zh)。
+
+当前请求端点为 `https://openspeech.bytedance.com/api/v3/tts/unidirectional`，使用 HTTP Chunked 响应，逐个非空行解析 JSON 音频分片；本实现使用该无 `/sse` 后缀的接口。
+
+使用随包的火山官方 Python 脚本与 httpx 依赖，目标环境需要 `python3`；本轮设备已确认存在。插件包不携带 eSpeak，也不要求用户单独安装 Python 依赖。
+
+原有四种语音模式、强制语音、随机音色和会话覆盖保留。请求失败、缺少凭据或音色不可用时降级为文字。旧通用 TTS 地址、本地引擎和 SAPI/eSpeak 音色配置不再作为当前界面的语音设置；旧字段仅留作配置兼容，不代表火山控制台已为它们提供授权。
+
+### 当前验收边界
+
+已在 DSHA `0.2.1-rc.2 build190` 的 arm64/glibc 环境完成包导入、重启加载、QQ/NapCat 下载与启动、QQ 登录及重开保留、HTTP/WS 连接、手机内嵌移动页面、管理接口鉴权、正常停止和并发关闭验证。工作台记录过收 1 / 回 1；豆包真实 API 合成成功。用户随后要求清空手机上的插件和登录数据，以自行体验首次安装。
+
+识图、QQ 语音发送、搜索、主动发言和历史业务数据的完整回归尚未完成。DSHA 在测试期间发生过一次原生崩溃，根因未确定；不能将上述通过项当作所有设备与功能都已验证。
+
+下方保留上游功能与版本历史说明；较早版本段落中的默认策略和已移除配置是历史记录，当前功能以 2.8.0 源码为准，平台运行方式以上面的 DSHA 说明为准。
 
 ## 2.8.0：联网搜索（手动 + 不懂自动查）
 
@@ -198,8 +251,8 @@ DeepSeek Harness (DSH) 插件：**内置 NapCat**（随 tgz 一起分发），�
 - 带图 + 强制语音 → 不走抠文本，走识图 + 人设起稿 + 强制语音（否则会把「这是啥」念出来）。
 - 优先级最高：`ttsMode=off`、随机 0% 也照发。
 
-**② 内置离线语音引擎（真开箱即用）**
-没填 TTS 接口地址时，自动用 Windows 自带语音（SAPI）合成 WAV → 交 NapCat 发语音。零依赖、无需联网、无需 Key；本机实测 3.16 秒语音合成耗时 ~2.4 秒。填了接口则以接口为准。可在面板关闭（「接口没填时用系统内置语音」）或指定音色（Huihui / Xiaoxiao …）。
+**② 原版内置离线语音引擎（历史）**
+上游曾使用 Windows SAPI；本 DSHA 版本按当前要求改为豆包（火山引擎）API，配置方式见前文。历史本地音色和通用接口地址不再作为当前界面的语音设置。
 
 **③ 识图接口自动预置**
 默认 `visionEndpoint = zhipu`（智谱，`glm-4v-flash` 有免费额度），模型名自动补，提示词默认「简短描述图片内容，不要冗长」，开关默认开 —— **只需要补一个 API Key** 就能识图（面板会显示「缺 API Key → 补上即可识图」）。地址/提示词都能在界面改，保存即持久化。
@@ -303,7 +356,7 @@ TTS / 识图 超时、401、5xx、返回空 → 一律降级为文字（或人�
 
 **随机模式细节**
 
-> ⚠️ 语音要真的出声，**必须填「TTS 接口地址」**。接口只需要 `POST {text, voice}` 返回音频二进制或 `{"audio_base64":"..."}`；OpenAI 兼容的 `/v1/audio/speech` 也能直接用（此时再填「TTS 模型名」）。没填接口时面板会显示「未填接口地址」，行为等同只发文字。
+> 这段描述的是上游 2.1.0 的接口方案；本 DSHA 版本使用前文的豆包 API 配置，通用 HTTP TTS 地址不再呈现在设置面板中。
 
 - 概率滑动条 0~100%，默认 **40%**；0 = 永不发，100 = 次次发。是每轮独立掷骰，不是固定间隔，所以出现「有时出声、有时懒得开口」的随性节奏。
 - **人设智能权重**（默认开）：短句（≤12 字）权重 ×1.3、活泼语气再往上抬；长段解释（>120 字）×0.72、emotion 低落词（难过/累/emo/哭…）再压；人设里带「懒 / 瘫 / 佛系 / 慢悠悠」整体 ×0.9。边界仍然严格：0 还是 0，100 还是 100。
@@ -348,7 +401,7 @@ TTS / 识图 超时、401、5xx、返回空 → 一律降级为文字（或人�
 
 ## 三步验收
 
-1. 导入 `dsh-napcat-bot-2.8.0.tgz` → **完全退出并重启 DSH**（服务端代码只在启动时加载）→ 启用插件 → 日志出现「内置 NapCat 已就绪，WebUI 监听 127.0.0.1:6099」。
+1. 导入 `dsh-napcat-bot-linux-2.8.0-dsha-linux-arm64.tgz` → 按 DSHA 提示**正常重启 Web**（服务端代码只在启动时加载）→ 启用插件 → 日志出现「NapCat 已就绪，WebUI 监听 127.0.0.1:6099」。
 2. 设置页左侧【集成】里点「NapCat QQ 机器人」→ 第二个标签页「NapCat WebUI」已自动带上管理 Token，直接扫码登录。
 3. 三个状态灯全绿（NapCat 进程 ✓ / WS 已连接 ✓ / 可以收发消息 ✓）后，私聊发消息、群里 @ 机器人即可收到 AI 回复。
 
@@ -416,7 +469,7 @@ NapCat 的 HTTP 适配器**不按 body 里的 `action` 字段分发**。往根�
 
 ## 自动写入的 NapCat 配置
 
-插件启动内置 NapCat 前会主动写配置文件（作为**兜底**），并在运行期用官方 API 校正：
+插件启动 NapCat 前会主动写配置文件（作为**兜底**），并在运行期用官方 API 校正：
 
 - `config/webui.json`：`host=127.0.0.1`、`port=6099`、带 token、不禁用 WebUI。
 - `config/onebot11_<QQ>.json`（对历史登录过的 QQ 号全部预置）：
@@ -431,7 +484,7 @@ NapCat 的 HTTP 适配器**不按 body 里的 `action` 字段分发**。往根�
 
 | 灯 | 含义 |
 |---|---|
-| 🟢 NapCat 进程已启动 | 内置 NapCat 在跑（**按 6099 端口实际监听判定**，不是看状态文件） |
+| 🟢 NapCat 进程已启动 | NapCat 在跑（**按 6099 端口实际监听判定**，不是看状态文件） |
 | 🟡 WS 正在尝试连接 | 插件正在重连 `ws://127.0.0.1:3001`；旁边显示第几次重试、下次重试倒计时 |
 | 🔴 WS 连接失败 | 重连次数用尽（`wsMaxRetries>0` 时）或环境不支持 WebSocket |
 | 🟢✓ 可以收发消息 | WS 已连接 **且** 3001 在监听 **且** QQ 已登录 |
@@ -460,34 +513,32 @@ NapCat 的 HTTP 适配器**不按 body 里的 `action` 字段分发**。往根�
 - 发送失败会被捕获并显示在面板（`发送失败：...`），同时计入「失败」计数。
 - 面板顶部有**连接指示灯**：`未连接 / 连接中 / 已就绪`，并显示 QQ 号、收发计数、最近收到时间、错误信息。
 
-## 面板结构（固定两个标签页）
+## 面板结构（三个标签页）
 
-1. **AI 配置**：`AI 配置` 内含内置 NapCat 状态卡与启停、连接（全部自动维护，一般不用改）、人格与回复、行为与风控（记忆开关、群内仅 @ 回复、主动发言、冷却与每分钟上限）。
+1. **AI 配置**：`AI 配置` 内含 NapCat 状态卡与启停、连接（全部自动维护，一般不用改）、人格与回复、行为与风控（记忆开关、群内仅 @ 回复、主动发言、冷却与每分钟上限）。
 2. **NapCat WebUI**：内嵌 WebUI（自动免 Token 登录，这里扫码登录 QQ）、两类 Token 卡片、NapCat 控制台日志预览（实时刷新 / 暂停 / 只看 Token 行 / 复制日志）。
+3. **管理**：人格、会话、规则、知识库和任务，保留会话级模型、语音、识图、搜索与主动发言覆盖。
 
 插件详情页里的配置表单同样保留，两个入口共存。
 
 ## 进程管理
 
-- 启动前先检测：自己的 pid 文件 + 日志里的 `Main Process ID` + 6099 端口探测 + 短期互斥锁，**绝不重复多开** NapCat / QQ。
+- 启动前检查本插件的进程归属与现有监听状态；遇到身份未知的端口占用应报告冲突，不能据此终止其他进程。
 - 关闭插件或退出 DSH 时自动停掉由本插件拉起的 NapCat 进程树（面板可关 `stopNapCatOnDisable`）。
-- 面板提供「启动内置 NapCat / 重新启动 / 停止」。
+- 面板提供「启动 NapCat / 重新启动 / 停止」。
 
-## 关于 QQ（唯一的外部前提）
+## 关于 Linux QQ
 
-NapCat 的工作原理是**注入已安装的官方 QQ NT 客户端**（`NapCatWinBootMain.exe` + `NapCatWinBootHook.dll`）。
-系统上有官方 QQ 即可，**不需要**再单独安装或启动 NapCat。插件按下列顺序探测 QQ：
+NapCat 以官方 Linux QQ NT 为运行宿主；此版本通过修改 QQ 的应用入口加载 NapCat，不使用 Windows 注入器或 `QQ.exe`。首次需要时自动下载固定 arm64 QQ `.deb`，校验后解包到稳定数据目录，并保留同版本原始入口。
 
-1. 面板里填写的 `qqPath`；
-2. `%ProgramFiles%` / `%ProgramFiles(x86)%` / `%LOCALAPPDATA%\Programs` 下的 `Tencent\QQNT\QQ.exe`；
-3. `C:` – `F:` 盘下的 `Program Files\Tencent\QQNT\QQ.exe`、`Tencent\QQNT\QQ.exe`。
-
-探测不到时面板会明确提示「未检测到 QQ NT」并给出填写入口。
+`qqPath` 配置键继续保留，含义为 **DSHA Linux guest 内 QQ 可执行文件的路径**，不是安卓 QQ 的 APK 或 Android 私有目录。留空走自动下载与探测；找不到 QQ、下载失败或缺少运行库时，查看状态卡和日志中的具体错误。
 
 ## HTTP 面板接口
 
 > 注意：宿主 `webServer` 的 prefix 匹配是 `pathname === prefix || pathname.startsWith(prefix + '/')`，
 > 因此 prefix 路由的 path **结尾不能带斜杠**（早期版本 `/napcat-bot/api/napcat/` 就是因为这个永远 404）。
+
+以下管理接口均先通过 DSH 宿主 `connection.requestRejection()` 的访问检查，再读取配置、返回 Token 或执行操作。宿主拒绝时返回对应 HTTP 状态；宿主鉴权服务缺失或检查异常时返回 `503`。范围覆盖 `status`、`config`、`webui`、`webui/token`、`napcat`、`client-report` 和 `manage` 七个前缀；OneBot 消息 webhook 保留原有协议与鉴权。
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
@@ -495,11 +546,12 @@ NapCat 的工作原理是**注入已安装的官方 QQ NT 客户端**（`NapCatW
 | GET/POST | `/napcat-bot/api/config` | 读取 / 保存配置（保存即热重载） |
 | GET | `/napcat-bot/api/webui` | WebUI 地址 + 自动读取的管理 Token + OneBot token |
 | POST | `/napcat-bot/api/webui/token` | 重新生成 / 指定 WebUI 管理 Token（并重启生效） |
-| POST | `/napcat-bot/api/napcat/{start\|stop\|restart}` | 内置 NapCat 启停 |
+| POST | `/napcat-bot/api/napcat/{start\|stop\|restart}` | NapCat 启停 |
 | POST | `/napcat-bot/api/napcat/reconnect` | 只重连插件侧 WS（不动 NapCat、不踢 QQ） |
 | POST | `/napcat-bot/api/napcat/apply-onebot` | 立即通过 WebUI API 重新应用 OneBot 配置 |
 | GET | `/napcat-bot/api/napcat/log?tail=N` | 控制台日志尾部（含 Token 行） |
 | POST | `/napcat-bot/api/client-report` | 客户端 UI 注册自检回执（排障用） |
+| GET/POST/PUT | `/napcat-bot/api/manage?res=...` | 人格、会话、规则、知识库、任务与管理员管理 |
 
 ## 排障
 
@@ -512,7 +564,7 @@ NapCat 的工作原理是**注入已安装的官方 QQ NT 客户端**（`NapCatW
 | 显示「未登录」但 QQ 确实在线 | 1.4.0 已修：OneBot HTTP 必须 POST 到 `/<action>`，打到根路径只会拿到桩响应 |
 | 日志面板 404 | 1.3.0 起已修（路由 path 去掉尾斜杠），确认版本 ≥ 1.5.0 |
 | 收到消息但发不出去 | 1.5.0 会自动改走 WS 通道发送，不再依赖 3000；若仍失败看面板 `发送失败：...` 的具体报错 |
-| NapCat 进程显示「未运行」 | 1.5.0 按端口真实存活判定，会 12s 后自动拉起（10 分钟内最多 3 次）；也可点「启动内置 NapCat」 |
+| NapCat 进程显示「未运行」 | 1.5.0 按端口真实存活判定，会 12s 后自动拉起（10 分钟内最多 3 次）；也可点「启动 NapCat」 |
 | 回复走离线兜底 | 面板连接卡显示「回复引擎：离线兜底应答」→ DSH 未配置模型，或 `llm` 服务不可用 |
 | 内嵌 WebUI 空白 | 个别版本禁止 iframe 嵌套，点「在浏览器打开」，链接已带 Token |
 
@@ -564,17 +616,17 @@ lib/client.js          面板 UI（AI 配置 / NapCat WebUI / 管理 三个标�
 lib/pipeline.js        消息流水线：解析 → 过滤 → 去重 → 指令 → 识图 → 搜索 → 推理 → 分段/语音
 lib/responder.js       DSH 模型调用（system 只来自面板人格，三级重试，绝不输出套话）
 lib/napcat.js          OneBot 连接：HTTP 动作 + 正向 WS + 重连/心跳
-lib/napcat-embedded.js 内置 NapCat 进程管理（启动/停止/探活/自动拉起）
+lib/napcat-embedded.js NapCat 进程管理（启动/停止/探活/自动拉起）
 lib/vision.js          原生多模态：图片 → 附件引用；两种识图模式
 lib/search.js          联网搜索：手动指令 + 自动查证 + 断路器
 lib/tts.js             TTS 四种模式 + 强制语音 + 音色池 + 缓存
-lib/tts-local.js       内置离线语音（Windows SAPI）
+lib/tts-volcengine.js  豆包官方 Python 脚本调用与音频读取
 lib/proactive.js       主动发言调度（随缘随机、仅冷却）
 lib/state.js           人格/规则/定时任务持久化
 lib/sessions.js        会话与上下文
 lib/kb.js              知识库混合检索
 lib/risk.js            限流 / 黑白名单
-tools/                 开发期自测脚本（Node 原生跑，无第三方依赖）
+scripts/               DSHA 本地打包与归档回归（Node 原生跑，无第三方依赖）
 ```
 
 ## License
